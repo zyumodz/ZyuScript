@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Script</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    :root{
+      --bg:#0b1020;
+      --card:rgba(17,24,39,.92);
+      --border:rgba(255,255,255,.08);
+      --text:#f3f4f6;
+      --muted:#9ca3af;
+      --accent:#3b82f6;
+      --accent2:#8b5cf6;
+      --code-bg:#0f172a;
+    }
+
+    body{
+      font-family:'Inter',sans-serif;
+
+      background:
+      radial-gradient(circle at top left,
+      rgba(59,130,246,.25),
+      transparent 25%),
+
+      radial-gradient(circle at bottom right,
+      rgba(139,92,246,.18),
+      transparent 30%),
+
+      var(--bg);
+
+      min-height:100vh;
+
+      display:flex;
+      justify-content:center;
+      align-items:center;
+
+      padding:24px;
+      color:var(--text);
+    }
+
+    .container{
+      width:100%;
+      max-width:920px;
+    }
+
+    .paste-card{
+      background:var(--card);
+      backdrop-filter:blur(14px);
+
+      border:1px solid var(--border);
+
+      border-radius:24px;
+      overflow:hidden;
+
+      box-shadow:
+      0 20px 60px rgba(0,0,0,.45);
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+
+      gap:14px;
+      flex-wrap:wrap;
+
+      padding:20px 24px;
+
+      border-bottom:
+      1px solid var(--border);
+
+      background:
+      rgba(255,255,255,.02);
+    }
+
+    .title-wrap h1{
+      font-size:1.2rem;
+      font-weight:700;
+
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .title-wrap p{
+      color:var(--muted);
+      margin-top:5px;
+      font-size:.9rem;
+    }
+
+    .button-group{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+
+      padding:11px 18px;
+
+      font-size:.92rem;
+      font-weight:600;
+
+      cursor:pointer;
+
+      transition:.2s ease;
+
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .copy-btn{
+      background:var(--accent);
+      color:white;
+    }
+
+    .copy-btn:hover{
+      background:#2563eb;
+    }
+
+    .raw-btn{
+      background:
+      rgba(255,255,255,.05);
+
+      border:
+      1px solid var(--border);
+
+      color:var(--text);
+    }
+
+    .raw-btn:hover{
+      background:
+      rgba(255,255,255,.08);
+    }
+
+    .code-area{
+      position:relative;
+    }
+
+    pre{
+      margin:0;
+
+      padding:24px;
+
+      background:var(--code-bg);
+
+      overflow-x:auto;
+
+      min-height:420px;
+
+      line-height:1.7;
+      font-size:.94rem;
+
+      color:#dbeafe;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .footer{
+      padding:14px 24px;
+
+      border-top:
+      1px solid var(--border);
+
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+
+      flex-wrap:wrap;
+      gap:10px;
+
+      color:var(--muted);
+      font-size:.86rem;
+    }
+
+    .footer-item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    /* TOAST */
+    .toast{
+      position:fixed;
+
+      bottom:25px;
+      right:25px;
+
+      background:
+      rgba(17,24,39,.96);
+
+      border:
+      1px solid rgba(255,255,255,.08);
+
+      color:white;
+
+      padding:14px 18px;
+
+      border-radius:14px;
+
+      display:flex;
+      align-items:center;
+      gap:10px;
+
+      font-size:.92rem;
+      font-weight:600;
+
+      opacity:0;
+      visibility:hidden;
+
+      transform:translateY(20px);
+
+      transition:.3s ease;
+
+      box-shadow:
+      0 10px 35px rgba(0,0,0,.4);
+    }
+
+    .toast.show{
+      opacity:1;
+      visibility:visible;
+      transform:translateY(0);
+    }
+
+    @media(max-width:640px){
+      .topbar{
+        align-items:flex-start;
+      }
+
+      .button-group{
+        width:100%;
+      }
+
+      .btn{
+        flex:1;
+        justify-content:center;
+      }
+
+      pre{
+        padding:18px;
+        font-size:.88rem;
+      }
+
+      .toast{
+        right:16px;
+        left:16px;
+        bottom:16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="paste-card">
+
+    <!-- TOP -->
+    <div class="topbar">
+
+      <div class="title-wrap">
+        <h1>
+          <i class="fas fa-bolt"></i>
+          OP Script Paste
+        </h1>
+
+        <p>
+          Modern pastebin style layout
+        </p>
+      </div>
+
+      <div class="button-group">
+        <button class="btn copy-btn" onclick="copyCode()">
+          <i class="fas fa-copy"></i>
+          Copy
+        </button>
+
+        <button class="btn raw-btn" onclick="viewRaw()">
+          <i class="fas fa-code"></i>
+          Raw
+        </button>
+      </div>
+
+    </div>
+
+    <!-- CODE -->
+    <div class="code-area">
+      <pre><code id="scriptCode">loadstring(game:HttpGet("https://example.com/script.lua"))()</code></pre>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="footer-item">
+        <i class="fas fa-clock"></i>
+        <span id="uploadTime"></span>
+      </div>
+
+      <div class="footer-item">
+        <i class="fas fa-file-code"></i>
+        Lua Script
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <i class="fas fa-check-circle"></i>
+  <span>Copied to clipboard</span>
+</div>
+
+<script>
+/* UPLOAD TIME */
+const uploadDate = new Date("2026-05-12T12:00:00");
+
+function timeAgo(date){
+  const seconds = Math.floor((new Date() - date)/1000);
+
+  if(seconds < 60) return seconds + "s ago";
+
+  const minutes = Math.floor(seconds/60);
+  if(minutes < 60) return minutes + "m ago";
+
+  const hours = Math.floor(minutes/60);
+  if(hours < 24) return hours + "h ago";
+
+  const days = Math.floor(hours/24);
+  return days + "d ago";
+}
+
+function updateTime(){
+  document.getElementById("uploadTime").innerText = timeAgo(uploadDate);
+}
+
+updateTime();
+setInterval(updateTime,1000);
+
+/* COPY (WITH 3 SECOND POPUP COOLDOWN SAVED IN LOCALSTORAGE) */
+function copyCode(){
+
+  const code = document.getElementById("scriptCode").innerText;
+  navigator.clipboard.writeText(code);
+
+  const now = Date.now();
+  const lastPopupTime = parseInt(localStorage.getItem("lastPopupTime") || "0");
+
+  if(now - lastPopupTime >= 3000){
+
+    localStorage.setItem("lastPopupTime", now.toString());
+
+    window.open(
+      "https://omg10.com/4/10950082",
+      "_blank"
+    );
+  }
+
+  showToast();
+}
+
+/* TOAST */
+function showToast(){
+  const toast = document.getElementById("toast");
+  toast.classList.add("show");
+
+  setTimeout(()=>{
+    toast.classList.remove("show");
+  },2000);
+}
+
+/* RAW */
+function viewRaw(){
+  const code = document.getElementById("scriptCode").innerText;
+  const rawWindow = window.open("","_blank");
+
+  rawWindow.document.write(`
+<pre style="
+background:#0f172a;
+color:#dbeafe;
+padding:20px;
+margin:0;
+min-height:100vh;
+font-size:15px;
+line-height:1.7;
+font-family:Consolas,monospace;
+white-space:pre-wrap;
+word-break:break-word;
+">${code}</pre>
+`);
+}
+</script>
+
+</body>
+</html>
